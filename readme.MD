@@ -12,6 +12,20 @@ Uses standard .NET Core/AspNET/MVC approaches to expose a very simple web-api fo
 There are currently no tests around the Controller or the Service. They are pretty much acting a proxies directly to the [chess.engine][link.ChessEngine] with not logic of there own. This may of course change in the future if I add more complex API's.
 
 # TODOS
+* BUG - Highlighted in the react app
+```
+https://localhost:5001/api/chessgame/rnbqkbnrppppppp........p...E....................PPP.PPPPRNBQKBNRB0000/e7e5
+returns a valid enpassant take at d5d6
+```
+
+however requesting the move list for the board result in the previous requests i.e.
+```
+https://localhost:5001/api/chessgame/rnbqkbnrpppp.pp........p...Pe...................PPP.PPPPRNBQKBNRW0000
+```
+
+returns a different list of available moves
+
+
 * Flesh out this doc more
 * Some basic integration tests on the API (basic requests work, invalid request return expected codes)
 
