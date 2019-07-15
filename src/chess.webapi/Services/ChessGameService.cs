@@ -63,7 +63,7 @@ namespace chess.webapi.Services
         public ChessWebApiResult GetMoves(string board)
         {
             var game = ChessGameConvert.Deserialise(board);
-            var items = game.BoardState.GetItems();
+            var items = game.BoardState.GetItems((int) game.CurrentPlayer);
             return new ChessWebApiResult(game, game.CurrentPlayer, string.Empty, items.ToArray());
         }
 
