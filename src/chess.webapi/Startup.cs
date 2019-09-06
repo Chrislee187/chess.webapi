@@ -1,37 +1,43 @@
 ﻿using System;
+using System.IO;
 using chess.engine;
+using chess.webapi.Filters;
 using chess.webapi.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Serilog;
+using Microsoft.Extensions.Logging;
+//using Serilog;
+using Serilog.Sinks.File;
 
 namespace chess.webapi
 {
     public class Startup
     {
-//        public Startup(IConfiguration configuration)
-//        {
-//            Configuration = configuration;
-//        }
-//
-//        public IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; }
 
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            var config = services.ConfigureConfig();
-            services.ConfigureLogging(config);
+
+            services.AddMvc(opts =>
+            {
+                opts.Filters.Add(typeof(ActionPerformanceFilter)); 
+
+            }).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
             services.AddSwaggerDocument(settings =>
             {
                 settings.Title = "Chess.WebAPI";
             });
 
-            services.AddTransient<IChessService, ChessGameService>();
-            services.AddTransient<IPerfService, PerfService>();
+            services.AddScoped<IChessService, ChessGameService>();
 
             services.AddChessDependencies();
         }
@@ -65,36 +71,6 @@ namespace chess.webapi
 //                    .WithOrigins("http://localhost:5000");
             });
             app.UseMvcWithDefaultRoute();
-        }
-    }
-
-    public static class ServiceCollectionExtensions
-    {
-        public static IConfigurationRoot ConfigureConfig(this IServiceCollection serviceCollection)
-        {
-            var config = new ConfigurationBuilder()
-                .SetBasePath(AppContext.BaseDirectory)
-                .AddJsonFile("appsettings.json", false)
-                .Build();
-            serviceCollection.AddSingleton(config);
-            return config;
-        }
-
-        public static void ConfigureLogging(this IServiceCollection serviceCollection, IConfigurationRoot config)
-        {
-            // Add logging
-            serviceCollection.AddLogging(loggingBuilder =>
-            {
-                loggingBuilder.AddSerilog();
-//                loggingBuilder.AddConsole();
-            });
-
-            Log.Logger = new LoggerConfiguration()
-                .ReadFrom.Configuration(config)
-                .MinimumLevel.Information()
-                .Enrich.FromLogContext()
-                .CreateLogger();
-
         }
     }
 }
